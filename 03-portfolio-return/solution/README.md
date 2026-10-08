@@ -59,8 +59,28 @@ docker run -p 9091:9091 ghcr.io/donghyunkim-hi/portfolio-price-server:1.0.0
 ```
 com.practicefintech.portfolio
 ├── PortfolioApplication.java
-├── product/     # 상품 조회, CSV 로더(데이터 정리, 가정 G5)
-├── portfolio/   # 포트폴리오 CRUD, 계산(가정 G1~G4가 반영된 지점)
-├── price/       # 시세 서버 클라이언트(토큰 캐시), 스케줄러, 스냅샷 저장소
-└── common/      # 에러 응답, 페이지 응답
+├── common/
+│   ├── entity/        # Product, Portfolio, Holding (JPA 엔티티)
+│   ├── enums/          # CurrencyCode, ProductType
+│   ├── exception/      # ApiException, ErrorResponse, GlobalExceptionHandler
+│   ├── config/          # PriceClientProperties, ProductsProperties
+│   └── dto/             # PageResponse (공통 페이지 응답)
+└── domain/
+    ├── product/
+    │   ├── controller/
+    │   ├── service/      # ProductService, ProductCsvLoader(데이터 정리, 가정 G5), ProductSpecifications
+    │   ├── repository/
+    │   └── model/response/
+    ├── portfolio/
+    │   ├── controller/
+    │   ├── service/      # PortfolioService — 계산(가정 G1~G4가 반영된 지점)
+    │   ├── repository/
+    │   └── model/
+    │       ├── request/
+    │       └── response/
+    └── price/
+        ├── service/      # PriceClient(토큰 캐시), PriceRefreshScheduler, PriceSnapshotStore
+        └── model/dto/     # 가상 시세 서버의 External* 응답 형식
 ```
+
+nbcam-plus 스타일(패키지 구조)에 맞춰 재구성했습니다. DTO는 record 대신 Lombok(`@Getter` 등)을 쓴 일반 클래스입니다. 동작은 이전과 동일합니다.

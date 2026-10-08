@@ -38,9 +38,26 @@
 ```
 com.practicefintech.warmup
 ├── WarmupApplication.java
-├── coupon/        # 컨트롤러, 서비스(사용자 단위 락), CouponStore(수정 금지), 쿠폰 4종
-├── reservation/   # 컨트롤러, 서비스(방 단위 락), ReservationStore(수정 금지)
-└── common/        # 공통 에러 응답 (ApiException, GlobalExceptionHandler)
+├── common/
+│   ├── entity/        # Coupon, Reservation — 수정 금지 (뼈대 그대로)
+│   ├── enums/          # CouponType(수정 금지), ErrorCode
+│   └── exception/      # ApiException, ErrorResponse, GlobalExceptionHandler
+└── domain/
+    ├── coupon/
+    │   ├── controller/
+    │   ├── service/      # CouponService(사용자 단위 락)
+    │   ├── repository/    # CouponStore — 수정 금지 (뼈대 그대로)
+    │   └── model/
+    │       ├── request/
+    │       └── response/
+    └── reservation/
+        ├── controller/
+        ├── service/       # ReservationService(방 단위 락)
+        ├── repository/     # ReservationStore — 수정 금지 (뼈대 그대로)
+        └── model/
+            ├── request/
+            ├── response/
+            └── dto/        # RoomReservation (내부 전달용)
 ```
 
-패키지 이름이 뼈대(`com.practice.warmup`)와 다릅니다. 정답 코드만의 차이이며 채점과는 무관합니다.
+패키지 이름이 뼈대(`com.practice.warmup`)와 다릅니다. 정답 코드만의 차이이며 채점과는 무관합니다. nbcam-plus 스타일(패키지 구조)에 맞춰 재구성했습니다. DTO는 record 대신 Lombok(`@Getter` 등)을 쓴 일반 클래스입니다. 동작은 이전과 동일합니다.

@@ -58,10 +58,24 @@
 ```
 com.practicefintech.paymentlimit
 ├── PaymentLimitApplication.java
-├── payment/   # 컨트롤러, DTO, 에러 처리, 서비스(동시성 처리 지점)
-├── limit/     # LimitStore, PaymentRecord, PaymentState — 수정 금지 (뼈대 그대로)
-└── fee/       # FeePolicy — 레거시 계산기를 표 기준으로 다시 쓴 버전
+├── common/
+│   ├── entity/        # PaymentRecord — 수정 금지 (뼈대 그대로)
+│   ├── enums/          # Grade, PayType, PaymentState, ErrorCode
+│   └── exception/      # ApiException, ErrorResponse, GlobalExceptionHandler
+└── domain/
+    ├── payment/
+    │   ├── controller/
+    │   ├── service/     # PaymentService(동시성 처리 지점)
+    │   ├── repository/   # LimitStore — 수정 금지 (뼈대 그대로)
+    │   └── model/
+    │       ├── request/
+    │       └── response/
+    └── fee/
+        ├── service/     # FeePolicy — 레거시 계산기를 표 기준으로 다시 쓴 버전
+        └── model/response/
 ```
+
+nbcam-plus 스타일(패키지 구조)에 맞춰 재구성했습니다. DTO는 record 대신 Lombok(`@Getter` 등)을 쓴 일반 클래스입니다. 동작은 이전과 동일합니다.
 
 ## 뼈대와 달라진 점
 

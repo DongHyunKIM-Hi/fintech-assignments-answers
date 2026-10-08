@@ -21,6 +21,8 @@
 | `평가기준표.md` | 튜터 채점 기준 (배점, 수준별 기준, 확인 방법, 치명 오류, 기록 양식) |
 | `solution/` | 정답 서버 (Java 17 · Spring Boot 4.1.1 · Gradle). 실행 방법과 설계 결정은 `solution/README.md` |
 
+4개 과제 모두 패키지 구조를 `common/{entity,enums,exception,config,utils,dto}` + `domain/<기능>/{controller,service,repository,model/{request,response,dto}}` 형태로 통일했습니다. DTO는 record 대신 Lombok(`@Getter`, `@AllArgsConstructor` 등)을 쓴 일반 클래스입니다. 수강생 뼈대(starter-project)가 있는 과제 2·4도 같은 구조입니다.
+
 ## 과제 한눈에 보기
 
 | | 과제 1 | 과제 2 | 과제 3 | 과제 4 (워밍업) |

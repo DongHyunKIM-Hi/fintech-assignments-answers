@@ -49,9 +49,23 @@ docker run -p 9090:9090 ghcr.io/donghyunkim-hi/pg-mock:1.0.0
 ```
 com.practicefintech.refundrelay
 ├── RefundRelayApplication.java
-├── refund/   # 접수·조회 API, 엔티티, 저장소, 서비스(중복·한도 처리), 에러 응답
-└── worker/   # 처리 워커, 결제대행사 클라이언트, 재시도·시간 초과 설정
+├── common/
+│   ├── entity/        # Refund (JPA 엔티티)
+│   ├── enums/          # RefundStatus, FailureReason, PgCallResult
+│   ├── exception/      # ErrorResponse, ApiExceptionHandler
+│   ├── config/         # PgClientProperties, WorkerProperties
+│   └── utils/          # PgClient (가상 결제대행사 호출)
+└── domain/
+    └── refund/
+        ├── controller/
+        ├── service/     # RefundService(접수·중복·한도), RefundWorker(처리 워커)
+        ├── repository/
+        └── model/
+            ├── request/
+            └── response/
 ```
+
+nbcam-plus 스타일(패키지 구조)에 맞춰 재구성했습니다. DTO는 record 대신 Lombok(`@Getter` 등)을 쓴 일반 클래스입니다. 동작은 이전과 동일합니다.
 
 ## 알아 둘 점
 
