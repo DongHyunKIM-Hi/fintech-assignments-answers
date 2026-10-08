@@ -1,9 +1,0 @@
-# 튜터가 수강생 제출물을 검증할 때 사용. admin API(/admin/*)를 활성화한다.
-# 수강생에게는 이 파일을 배포하지 않는다.
-services:
-  pg-mock:
-    image: ghcr.io/donghyunkim-hi/pg-mock:1.0.0
-    ports:
-      - "9090:9090"
-    environment:
-      ADMIN_ENABLED: "true"

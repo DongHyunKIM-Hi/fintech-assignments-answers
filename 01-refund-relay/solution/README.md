@@ -6,8 +6,8 @@
 ## 실행
 
 ```bash
-# 1) 가상 결제대행사 (이 저장소의 ../tutor/compose.eval.yaml — admin API가 켜진 튜터용)
-docker compose -f ../tutor/compose.eval.yaml up
+# 1) 가상 결제대행사 (포트 9090)
+docker run -p 9090:9090 ghcr.io/donghyunkim-hi/pg-mock:1.0.0
 
 # 2) 정답 서버 (포트 8080)
 ./gradlew bootRun

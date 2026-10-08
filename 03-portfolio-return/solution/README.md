@@ -6,8 +6,8 @@
 ## 실행
 
 ```bash
-# 1) 가상 시세 서버 (이 저장소의 ../tutor/compose.eval.yaml — admin API가 켜진 튜터용)
-docker compose -f ../tutor/compose.eval.yaml up
+# 1) 가상 시세 서버 (포트 9091)
+docker run -p 9091:9091 ghcr.io/donghyunkim-hi/portfolio-price-server:1.0.0
 
 # 2) 정답 서버 (포트 8080)
 ./gradlew bootRun
