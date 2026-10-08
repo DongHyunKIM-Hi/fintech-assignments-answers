@@ -31,7 +31,13 @@ public class CouponService {
     }
 
     public void issue(String userId, CouponType type) {
-        couponStore.save(userId, Coupon.issue(type));
+        // 발급도 저장소의 같은 사용자 리스트를 건드리므로, use()와 같은 락을 쓴다.
+        // (그렇지 않으면 같은 사용자에게 동시에 발급 요청이 여러 건 와도, 혹은 발급과
+        // 사용이 동시에 와도 내부 리스트가 안전하지 않다.)
+        Object lock = userLocks.computeIfAbsent(userId, k -> new Object());
+        synchronized (lock) {
+            couponStore.save(userId, Coupon.issue(type));
+        }
     }
 
     public UseCouponResponse use(String userId, long amount) {
