@@ -1,0 +1,25 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: refund-relay
+  datasource:
+    url: jdbc:h2:mem:refundrelay;DB_CLOSE_DELAY=-1
+  jpa:
+    hibernate:
+      ddl-auto: update
+    open-in-view: false
+
+# 가상 결제대행사 연동 설정. prefix가 "pg"인 이유는 PgClientProperties 주석 참고
+# (환경변수 PG_BASE_URL과 정확히 대응해야 함)
+pg:
+  base-url: http://localhost:9090
+  call-timeout-ms: 5000
+
+# 처리 워커(재시도) 설정
+worker:
+  pool-size: 8
+  tick-interval-ms: 300
+  max-attempts: 4
+  retry-backoff-ms: [500, 1000, 2000]

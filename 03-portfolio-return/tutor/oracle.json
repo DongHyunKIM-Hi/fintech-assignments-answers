@@ -1,0 +1,81 @@
+{
+  "seed": 20260923,
+  "totalRows": 130,
+  "uniqueCodeCount": 120,
+  "duplicateCodeCount": 10,
+  "blankRiskCount": 8,
+  "typeCounts": {
+    "ETF": 55,
+    "FUND": 40,
+    "BOND": 25
+  },
+  "currencyCountsAfterCleanup": {
+    "KRW": 80,
+    "USD": 40
+  },
+  "duplicateCodes": [
+    "A012",
+    "A026",
+    "A037",
+    "A041",
+    "A051",
+    "A056",
+    "A059",
+    "A061",
+    "A083",
+    "A120"
+  ],
+  "blankRiskCodes": [
+    "A025",
+    "A038",
+    "A057",
+    "A074",
+    "A108",
+    "A113",
+    "A115",
+    "A117"
+  ],
+  "firstSeenRowPerDuplicateCode": {
+    "A012": {
+      "name": "가상 중소형 ETF 99(중복행)",
+      "listedDateRaw": "2016-03-01"
+    },
+    "A026": {
+      "name": "가상 혁신 ETF 02",
+      "listedDateRaw": "2017/10/18"
+    },
+    "A037": {
+      "name": "가상 인프라 펀드 03",
+      "listedDateRaw": "2015-10-30"
+    },
+    "A041": {
+      "name": "가상 혁신 펀드 03",
+      "listedDateRaw": "2020/03/25"
+    },
+    "A051": {
+      "name": "가상 에너지 펀드 04",
+      "listedDateRaw": "20250809"
+    },
+    "A056": {
+      "name": "가상 혁신 펀드 04",
+      "listedDateRaw": "2021/06/14"
+    },
+    "A059": {
+      "name": "가상 배당 ETF 93(중복행)",
+      "listedDateRaw": "2022-08-12"
+    },
+    "A061": {
+      "name": "가상 기술 ETF 92(중복행)",
+      "listedDateRaw": "2021/08/12"
+    },
+    "A083": {
+      "name": "가상 소비재 채권 06",
+      "listedDateRaw": "2021/02/01"
+    },
+    "A120": {
+      "name": "가상 가치 ETF 90(중복행)",
+      "listedDateRaw": "2016-01-29"
+    }
+  },
+  "note": "정렬·검색 벡터를 만들 때는 duplicateCodes와 blankRiskCodes에 속한 코드를 제외한다."
+}
