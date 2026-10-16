@@ -8,7 +8,7 @@ import org.junit.jupiter.params.provider.CsvSource;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
- * 기준표 B(테스트 작성) "상" 수준의 예시입니다.
+ * 평가 기준표 B 영역(테스트 작성)에서 상 수준에 해당하는 예시입니다.
  * 규칙이 바뀌는 경계값과 규칙끼리 겹치는 경우를 표에서 그대로 옮겨 검증합니다.
  */
 class FeePolicyTest {

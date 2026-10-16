@@ -15,11 +15,10 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * 회의실 예약의 동시성을 책임지는 서비스.
+ * 회의실 예약의 동시성을 처리하는 서비스.
  *
- * 락의 폭: 방 단위. {@link #roomLocks}는 방 ID별로 서로 다른 락 객체를 준다.
- * 그래서 같은 방의 요청은 한 번에 하나씩만 처리되지만, 다른 방끼리는 완전히 병렬로
- * 처리된다 (T4, 시나리오 S10).
+ * 락 범위는 회의실 단위다. {@link #roomLocks}는 회의실 ID마다 다른 락 객체를 준다.
+ * 그래서 같은 회의실의 요청은 하나씩 처리되고, 다른 회의실의 요청은 동시에 처리된다. (시나리오 S10)
  */
 @Service
 public class ReservationService {
@@ -43,7 +42,7 @@ public class ReservationService {
 
         Object lock = roomLocks.computeIfAbsent(roomId, k -> new Object());
         synchronized (lock) {
-            // T3 대응: "겹침 확인"과 "저장"을 같은 락 안에서 함께 수행해,
+            // 겹침 확인과 저장을 같은 락 안에서 수행해,
             // 그 사이 다른 요청이 같은 시간대를 먼저 차지하지 못하게 한다.
             boolean conflict = reservationStore.findByRoomId(roomId).stream()
                     .anyMatch(r -> r.overlaps(from, to));

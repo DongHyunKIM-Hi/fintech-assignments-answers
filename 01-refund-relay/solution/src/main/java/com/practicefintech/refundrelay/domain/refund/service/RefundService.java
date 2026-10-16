@@ -21,10 +21,10 @@ import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * 접수 로직의 핵심: 같은 주문(orderId) 단위로 "중복 확인 → 한도 확인 → 저장"을
- * 하나의 락 안에서 원자적으로 수행한다 (project-overview.md 7장, 함정 T1~T3).
- * DB의 refundId 유니크 제약은 혹시 락이 무력화되는 상황(예: 여러 인스턴스)에 대비한
- * 최종 방어선으로만 쓴다 — 정상 경로에서는 락이 먼저 막아 준다.
+ * 접수 로직: 같은 주문(orderId) 단위 락 안에서 중복 확인, 한도 확인, 저장을
+ * 한 번에 수행한다. (시나리오 S2, S4, S5, S6)
+ * DB의 refundId 유일 제약은 락이 동작하지 않는 상황(예: 서버 여러 대)에 대비한
+ * 마지막 방어 수단이다. 정상 경로에서는 락이 먼저 중복을 막는다.
  */
 @Service
 @RequiredArgsConstructor
@@ -43,8 +43,8 @@ public class RefundService {
     /**
      * 이 메서드는 항상 {@link #accept}의 synchronized 블록 안에서만 호출된다.
      * 같은 orderId에 대해서는 한 번에 한 스레드만 들어오므로, 별도의 DB 트랜잭션으로
-     * 묶지 않아도 "조회 → 판단 → 저장"이 원자적으로 보인다. (자바 락이 1차 방어선,
-     * Refund.refundId의 DB 유니크 제약이 2차 방어선)
+     * 묶지 않아도 조회, 판단, 저장이 하나의 단위로 실행된다.
+     * (1차 방어 수단은 자바 락, 2차 방어 수단은 Refund.refundId의 DB 유일 제약)
      */
     private ResponseEntity<?> acceptLocked(RefundRequest request) {
         Optional<Refund> existing = repository.findByRefundId(request.getRefundId());
@@ -76,8 +76,8 @@ public class RefundService {
 
     /**
      * 정상 경로에서는 orderId 락이 이미 같은 refundId의 동시 삽입을 막아 주므로
-     * 유니크 제약 위반은 거의 일어나지 않는다. 그래도 방어적으로 잡아
-     * "이미 있던 것으로 취급"하도록 폴백한다.
+     * 유일 제약 위반은 거의 일어나지 않는다. 위반이 발생하면 예외를 잡아
+     * 이미 저장된 요청으로 처리한다.
      */
     private void saveNewRefund(Refund refund) {
         try {

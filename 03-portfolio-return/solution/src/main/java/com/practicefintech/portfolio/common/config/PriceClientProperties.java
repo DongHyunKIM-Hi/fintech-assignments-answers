@@ -5,8 +5,8 @@ import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 /**
- * 가상 시세 서버 연동 설정. prefix가 "price"이므로 환경변수 {@code PRICE_BASE_URL}이
- * {@link #getBaseUrl()}과 정확히 대응한다 (가이드 3장에서 약속한 이름).
+ * 가상 시세 서버 연동 설정. prefix가 price이므로 환경변수 {@code PRICE_BASE_URL}이
+ * {@link #getBaseUrl()}과 대응한다. (환경변수 이름은 수강생 README 3장에 명시)
  */
 @Getter
 @Setter

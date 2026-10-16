@@ -18,8 +18,8 @@ import lombok.NoArgsConstructor;
 import java.time.Instant;
 
 /**
- * 환불 요청 1건. refundId에 유니크 제약을 걸어 "같은 ID의 동시 요청"을 DB 차원에서
- * 막는 최종 방어선으로 삼는다 (주된 방어선은 RefundService의 주문 단위 락).
+ * 환불 요청 1건. refundId에 유일 제약을 걸어, 같은 ID의 동시 요청을 DB에서 막는
+ * 마지막 방어 수단으로 사용한다. (주된 방어 수단은 RefundService의 주문 단위 락)
  */
 @Entity
 @Getter

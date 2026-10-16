@@ -7,11 +7,11 @@ import org.springframework.stereotype.Component;
 import java.util.Map;
 
 /**
- * 수수료 정책. (학생 가이드 6장 규칙 표의 정답 구현)
+ * 수수료 정책. (수강생 README 6장 규칙 표의 정답 구현)
  *
- * 레거시 코드({@code LegacyFeeCalculator}에 해당)를 표를 기준으로 다시 작성했습니다.
- * bp(1bp = 0.01%) 정수 계산만 사용해 오차가 없고, 표의 적용 순서(면제 → 수수료율 결정 →
- * 고액 감면 → 절사·최소 → 상한)를 그대로 단계로 나누었습니다.
+ * 기존 코드({@code LegacyFeeCalculator})를 규칙 표 기준으로 다시 작성했습니다.
+ * bp(1bp = 0.01%) 단위 정수로만 계산해 오차가 없습니다.
+ * 표의 적용 순서(면제, 수수료율 결정, 고액 감면, 버림과 최소 수수료, 최대 수수료)대로 단계를 나누었습니다.
  */
 @Component
 public class FeePolicy {

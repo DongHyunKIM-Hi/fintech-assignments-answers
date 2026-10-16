@@ -29,8 +29,8 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 /**
- * 포트폴리오 생성·조회·수정·삭제와 수익률 계산. 이 클래스가 계약 6장(계산 규칙)과
- * 가정 G1(구성 변경), G2(오늘 손익), G3(통화 혼재), G4(시세 실패)를 구현하는 지점이다.
+ * 포트폴리오 생성, 조회, 수정, 삭제와 수익률 계산.
+ * README 6장(계산 규칙)과 가정 G1(구성 변경), G2(오늘 손익), G3(통화 혼재), G4(시세 실패)를 이 클래스에서 구현한다.
  * 자세한 이유는 {@code docs/assumptions.md} 참고.
  */
 @Service
@@ -194,7 +194,7 @@ public class PortfolioService {
 
         LocalDate today = LocalDate.now();
         if (allowBaselineUpdate && !today.equals(portfolio.getTodayBaselineDate())) {
-            // 오늘 날짜로 처음 조회된 시점 = "오늘"의 기준으로 삼는다 (가정 G2).
+            // 오늘 날짜로 처음 조회된 시점을 오늘 손익의 기준으로 삼는다. (가정 G2)
             portfolio.setTodayBaseline(roundedValue, today);
         }
         BigDecimal baseline = portfolio.getTodayBaselineValue() == null ? roundedCost : portfolio.getTodayBaselineValue();

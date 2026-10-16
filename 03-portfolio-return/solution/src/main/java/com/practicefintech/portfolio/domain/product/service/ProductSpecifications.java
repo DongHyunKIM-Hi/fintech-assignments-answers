@@ -5,7 +5,7 @@ import com.practicefintech.portfolio.common.enums.CurrencyCode;
 import com.practicefintech.portfolio.common.enums.ProductType;
 import org.springframework.data.jpa.domain.Specification;
 
-/** 상품 검색·필터 조건을 동적으로 조합한다. 서로 다른 조건은 모두 AND로 묶인다. */
+/** 상품 검색 조건과 필터 조건을 동적으로 조합한다. 서로 다른 조건은 모두 AND로 묶인다. */
 public final class ProductSpecifications {
 
     private ProductSpecifications() {

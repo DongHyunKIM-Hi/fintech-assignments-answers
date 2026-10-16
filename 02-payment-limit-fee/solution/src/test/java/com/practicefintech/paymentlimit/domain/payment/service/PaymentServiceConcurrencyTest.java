@@ -21,9 +21,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
- * 기준표 B(테스트 작성) "상" 수준의 예시입니다.
- * 요청을 실제로 동시에 출발시키고(래치), 성공 개수와 최종 사용액(불변 조건)을 함께 검증합니다.
- * 매 테스트마다 새 LimitStore를 만들어 서로 영향을 주지 않습니다(재현성·독립성).
+ * 평가 기준표 B 영역(테스트 작성)에서 상 수준에 해당하는 예시입니다.
+ * 래치로 요청을 동시에 출발시키고, 성공 개수와 최종 사용액(불변 조건)을 함께 검증합니다.
+ * 테스트마다 새 LimitStore를 만들어 테스트끼리 영향을 주지 않습니다.
  */
 class PaymentServiceConcurrencyTest {
 

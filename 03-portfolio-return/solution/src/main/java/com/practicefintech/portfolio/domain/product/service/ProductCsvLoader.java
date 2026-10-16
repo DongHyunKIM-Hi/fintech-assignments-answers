@@ -24,9 +24,12 @@ import java.util.Map;
 
 /**
  * 서버 시작 시 {@code data/products.csv}(제공된 파일, 수정하지 않음)를 읽어 정리한 뒤 저장한다.
- * 정리 규칙(가정 G5): 통화 표기를 KRW/USD로 통일하고, 상장일을 세 형식 중 하나로 파싱하고,
- * 위험등급 빈 칸은 null로 두며(정렬 시 맨 뒤), 같은 코드가 두 번 나오면 "먼저 나온 행"을 유지하고
- * 나머지는 경고 로그만 남긴다(다른 결정도 가능 — docs/assumptions.md 참고).
+ * 정리 규칙(가정 G5)
+ * - 통화 표기를 KRW, USD로 통일한다.
+ * - 상장일은 세 가지 형식 중 하나로 파싱한다.
+ * - 비어 있는 위험등급은 null로 둔다. (정렬할 때 맨 뒤)
+ * - 같은 코드가 두 번 나오면 먼저 나온 행을 유지하고, 나머지는 경고 로그만 남긴다.
+ *   다른 결정도 가능하다. (docs/assumptions.md 참고)
  */
 @Component
 public class ProductCsvLoader implements ApplicationRunner {

@@ -22,8 +22,8 @@ public class ApiExceptionHandler {
     }
 
     /**
-     * 정상 경로에서는 orderId 락이 막아 주므로 거의 발생하지 않지만, 혹시 유니크 제약을
-     * 뚫고 들어온 경우 "이미 존재하는 요청"으로 안전하게 처리한다.
+     * 정상 경로에서는 orderId 락이 먼저 막으므로 거의 발생하지 않는다.
+     * 유일 제약 위반이 발생하면 이미 존재하는 요청으로 처리한다.
      */
     @ExceptionHandler(DataIntegrityViolationException.class)
     public ResponseEntity<ErrorResponse> handleDuplicateInsert(DataIntegrityViolationException e) {

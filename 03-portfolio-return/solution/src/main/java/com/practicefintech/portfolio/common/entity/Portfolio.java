@@ -13,7 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * 사용자가 만든 포트폴리오. {@code todayBaseline*}는 "오늘 손익"의 기준값이다 (가정 G2):
+ * 사용자가 만든 포트폴리오. {@code todayBaseline*}는 오늘 손익의 기준값이다. (가정 G2)
  * 오늘 날짜에 처음 조회될 때의 평가금액을 그날의 기준으로 삼고, 생성 당일에는 생성 시점
  * 평가금액(= 매입금액, 손익 0)을 기준으로 시작한다.
  */

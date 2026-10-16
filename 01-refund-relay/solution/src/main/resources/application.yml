@@ -11,7 +11,7 @@ spring:
       ddl-auto: update
     open-in-view: false
 
-# 가상 결제대행사 연동 설정. prefix가 "pg"인 이유는 PgClientProperties 주석 참고
+# 가상 결제대행사 연동 설정. prefix를 pg로 정한 이유는 PgClientProperties 주석 참고
 # (환경변수 PG_BASE_URL과 정확히 대응해야 함)
 pg:
   base-url: http://localhost:9090
