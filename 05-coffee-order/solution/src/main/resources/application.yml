@@ -1,0 +1,29 @@
+server:
+  port: ${SERVER_PORT:8080}
+
+spring:
+  application:
+    name: coffee-order-solution
+  datasource:
+    url: jdbc:mysql://${DB_HOST:localhost}:3306/coffee?serverTimezone=Asia/Seoul
+    username: ${DB_USERNAME:root}
+    password: ${DB_PASSWORD:root}
+  jpa:
+    hibernate:
+      ddl-auto: none
+    open-in-view: false
+  sql:
+    init:
+      mode: always
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: 6379
+
+coffee:
+  # 같은 사용자의 락을 기다리는 최대 시간. 넘으면 503 응답
+  lock-wait-millis: 5000
+  # 데이터 수집 플랫폼 전송에 실패한 주문을 다시 보내는 주기
+  outbox-retry-millis: 10000
+  # 방금 만든 이벤트는 비동기 전송 중일 수 있으므로 이 시간이 지난 것만 재전송
+  outbox-retry-grace-seconds: 5
