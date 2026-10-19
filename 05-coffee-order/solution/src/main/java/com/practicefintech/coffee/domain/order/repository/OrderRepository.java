@@ -15,8 +15,6 @@ public interface OrderRepository extends JpaRepository<CoffeeOrder, Long> {
             + "where o.orderedAt >= :since group by o.menuId")
     List<MenuOrderCount> countByMenuSince(@Param("since") LocalDateTime since);
 
-    long countByUserId(Long userId);
-
     interface MenuOrderCount {
         Long getMenuId();
 

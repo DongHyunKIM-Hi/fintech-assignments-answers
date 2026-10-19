@@ -15,10 +15,17 @@ spring:
   sql:
     init:
       mode: always
+  jackson:
+    deserialization:
+      # 10.5처럼 소수가 들어온 금액을 10으로 잘라 받지 않고 400으로 거절한다
+      accept-float-as-int: false
   data:
     redis:
       host: ${REDIS_HOST:localhost}
       port: 6379
+      # Redis가 응답하지 않을 때 기본값(60초)만큼 기다리지 않고 바로 실패시킨다
+      timeout: 2s
+      connect-timeout: 2s
 
 coffee:
   # 같은 사용자의 락을 기다리는 최대 시간. 넘으면 503 응답

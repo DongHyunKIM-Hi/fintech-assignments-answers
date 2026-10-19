@@ -4,5 +4,6 @@ public enum ErrorCode {
     INVALID_REQUEST,
     MENU_NOT_FOUND,
     INSUFFICIENT_POINT,
-    REQUEST_BUSY
+    REQUEST_BUSY,
+    INTERNAL_ERROR
 }

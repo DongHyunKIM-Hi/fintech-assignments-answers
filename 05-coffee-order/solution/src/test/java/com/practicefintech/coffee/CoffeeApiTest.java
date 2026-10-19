@@ -9,7 +9,9 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.hasSize;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -47,6 +49,27 @@ class CoffeeApiTest extends IntegrationTestSupport {
         charge(1, 0).andExpect(status().isBadRequest()).andExpect(jsonPath("$.code").value("INVALID_REQUEST"));
         charge(1, -100).andExpect(status().isBadRequest());
         charge(1, 1_000_001).andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @DisplayName("포인트 충전: 10.5처럼 소수인 금액은 잘라서 충전하지 않고 400")
+    void chargeDecimalAmount() throws Exception {
+        mockMvc.perform(post("/api/points/charge").contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"userId\":1,\"amount\":10.5}"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("INVALID_REQUEST"));
+        assertThat(balanceOf(1L)).isZero();
+    }
+
+    @Test
+    @DisplayName("잘못된 경로 값, 없는 경로, 지원하지 않는 메서드도 같은 에러 형식으로 응답한다")
+    void errorFormat() throws Exception {
+        mockMvc.perform(get("/api/points/abc"))
+                .andExpect(status().isBadRequest()).andExpect(jsonPath("$.code").value("INVALID_REQUEST"));
+        mockMvc.perform(get("/api/nothing"))
+                .andExpect(status().isNotFound()).andExpect(jsonPath("$.code").exists());
+        mockMvc.perform(delete("/api/menus"))
+                .andExpect(status().isMethodNotAllowed()).andExpect(jsonPath("$.code").exists());
     }
 
     @Test

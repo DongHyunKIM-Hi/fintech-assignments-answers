@@ -8,7 +8,18 @@ services:
       TZ: Asia/Seoul
     ports:
       - "3306:3306"
+    # docker compose up -d --wait 가 MySQL 준비가 끝날 때까지 기다리도록 상태 확인을 둔다
+    healthcheck:
+      test: ["CMD", "mysql", "-uroot", "-proot", "-e", "SELECT 1"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
   redis:
     image: redis:7.4
     ports:
       - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 2s
+      timeout: 3s
+      retries: 30

@@ -15,8 +15,6 @@ public interface OrderEventRepository extends JpaRepository<OrderEvent, Long> {
 
     List<OrderEvent> findTop100ByStatusAndCreatedAtBeforeOrderByIdAsc(OrderEventStatus status, LocalDateTime before);
 
-    long countByStatus(OrderEventStatus status);
-
     /** PENDING일 때만 SENT로 바꾼다. 이미 다른 곳에서 보내 SENT가 됐다면 0을 돌려준다. */
     @Transactional
     @Modifying(clearAutomatically = true)

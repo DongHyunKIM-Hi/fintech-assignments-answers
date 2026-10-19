@@ -17,7 +17,10 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.doThrow;
 
-/** [데이터 일관성] Redis에 문제가 생겨도 주문은 성공하고, 인기 메뉴는 주문 테이블로 정확히 집계된다. */
+/**
+ * [데이터 일관성] Redis 집계 반영과 조회가 실패해도 주문은 성공하고, 인기 메뉴는 주문 테이블로 정확히 집계된다.
+ * 분산 락도 Redis를 쓰므로, Redis 전체가 멈추면 주문 자체가 실패한다. 이 테스트는 집계만 실패하는 경우를 본다.
+ */
 class PopularMenuFallbackTest extends IntegrationTestSupport {
 
     @Autowired
