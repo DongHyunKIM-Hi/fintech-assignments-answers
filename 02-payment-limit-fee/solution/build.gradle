@@ -6,7 +6,7 @@ plugins {
 
 group = 'com.practicefintech.paymentlimit'
 version = '0.0.1-SNAPSHOT'
-description = '과제 2. 결제 한도 차감 + 수수료 정책 정답 구현 (강사용 참고 코드)'
+description = '과제 2. 결제 한도 차감 + 수수료 정책 정답 구현 (참고 구현)'
 
 java {
 	toolchain {

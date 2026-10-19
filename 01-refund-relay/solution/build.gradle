@@ -6,7 +6,7 @@ plugins {
 
 group = 'com.practicefintech.refundrelay'
 version = '0.0.1-SNAPSHOT'
-description = '환불 요청 중계 서버 정답 구현 (과제 1 강사용 참고 코드)'
+description = '환불 요청 중계 서버 정답 구현 (과제 1 참고 구현)'
 
 java {
 	toolchain {

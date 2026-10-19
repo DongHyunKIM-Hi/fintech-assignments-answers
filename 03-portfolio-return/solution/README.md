@@ -1,13 +1,13 @@
 # 과제 3. 가상 포트폴리오 수익률 서비스 정답 코드
 
-- 수강생에게 제공한 빈 시작 프로젝트(`starter-project/`)에 도메인 코드를 모두 새로 작성한 참고 구현입니다.
+- 지원자에게 제공한 빈 시작 프로젝트(`starter-project/`)에 도메인 코드를 모두 새로 작성한 참고 구현입니다.
 - 정답은 하나가 아닙니다. 특히 명세에 없는 빈틈(G1~G5)은 다른 결정이라도 근거가 있으면 인정합니다. (평가 기준표 B 영역)
 
 ## 실행 방법
 
 ```bash
 # 1) 가상 시세 서버 실행 (포트 9091)
-docker run -p 9091:9091 ghcr.io/donghyunkim-hi/portfolio-price-server:1.0.0
+docker run -p 9091:9091 ghcr.io/donghyunkim-hi/portfolio-price-server:1.1.0
 
 # 2) 정답 서버 실행 (포트 8080)
 ./gradlew bootRun

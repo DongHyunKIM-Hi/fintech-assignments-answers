@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component;
 import java.util.Map;
 
 /**
- * 수수료 정책. (수강생 README 6장 규칙 표의 정답 구현)
+ * 수수료 정책. (지원자 README 6장 규칙 표의 정답 구현)
  *
  * 기존 코드({@code LegacyFeeCalculator})를 규칙 표 기준으로 다시 작성했습니다.
  * bp(1bp = 0.01%) 단위 정수로만 계산해 오차가 없습니다.

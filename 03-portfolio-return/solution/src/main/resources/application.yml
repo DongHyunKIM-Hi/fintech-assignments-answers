@@ -15,8 +15,8 @@ spring:
 # (환경변수 PRICE_BASE_URL과 정확히 대응해야 함)
 price:
   base-url: http://localhost:9091
-  client-id: student
-  client-secret: student-secret
+  client-id: client
+  client-secret: client-secret
   call-timeout-ms: 3000
   refresh-interval-ms: 30000
   token-refresh-margin-seconds: 10

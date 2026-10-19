@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-/** API 명세: 수강생 README 5장 (구현할 API 명세) */
+/** API 명세: 지원자 README 5장 (구현할 API 명세) */
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/refunds")

@@ -6,7 +6,7 @@ plugins {
 
 group = 'com.practicefintech.portfolio'
 version = '0.0.1-SNAPSHOT'
-description = '과제 3. 가상 포트폴리오 수익률 서비스 정답 구현 (강사용 참고 코드)'
+description = '과제 3. 가상 포트폴리오 수익률 서비스 정답 구현 (참고 구현)'
 
 java {
 	toolchain {
