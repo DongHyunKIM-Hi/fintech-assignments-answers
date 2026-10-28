@@ -24,8 +24,9 @@ import java.util.concurrent.Executors;
  *   1) 같은 주문(orderId)의 환불은 접수 순서대로 한 건씩 처리한다. (시나리오 S11)
  *   2) 서로 다른 주문끼리는 병렬로 처리해, 한 주문이 오래 걸려도 다른 주문이 막히지 않는다.
  * 그래서 주문 하나를 스레드 풀의 작업 하나로 처리하고, ordersInFlight로 같은 주문이
- * 동시에 두 번 처리되지 않게만 막는다. 같은 주문의 다음 건은 이번 시도가 끝난 뒤
- * 다음 tick에서 자연스럽게 골라진다(오래된 순 조회이므로 순서가 보장된다).
+ * 동시에 두 번 처리되지 않게만 막는다. 주문 안에서는 항상 가장 오래된 건부터 처리하고,
+ * 그 건이 재시도 대기 중이면 같은 주문의 다음 건을 먼저 보내지 않고 이번 차례를
+ * 건너뛴다. (앞 건이 종결되기 전에는 다음 건을 보내지 않는다는 규칙, 시나리오 S11)
  */
 @Component
 @RequiredArgsConstructor
@@ -58,12 +59,17 @@ public class RefundWorker {
     }
 
     private void processOneAttempt(String orderId) {
-        Optional<Refund> due = repository.findFirstByOrderIdAndStatusAndNextAttemptAtLessThanEqualOrderByRequestedAtAsc(
-                orderId, RefundStatus.ACCEPTED, Instant.now());
-        if (due.isEmpty()) {
+        // 주문에서 가장 오래된 미종결 건을 고른다. 이 건이 재시도 대기 중이면
+        // 더 최근 건이 처리 가능하더라도 보내지 않는다. 접수 순서가 뒤집히기 때문이다.
+        Optional<Refund> oldest = repository.findFirstByOrderIdAndStatusOrderByRequestedAtAsc(
+                orderId, RefundStatus.ACCEPTED);
+        if (oldest.isEmpty()) {
             return;
         }
-        Refund refund = due.get();
+        Refund refund = oldest.get();
+        if (refund.getNextAttemptAt() != null && refund.getNextAttemptAt().isAfter(Instant.now())) {
+            return;
+        }
         refund.markSending();
         repository.save(refund);
 

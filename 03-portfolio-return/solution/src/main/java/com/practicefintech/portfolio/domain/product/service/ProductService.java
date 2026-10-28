@@ -60,11 +60,14 @@ public class ProductService {
         Sort.Direction direction = Sort.Direction.ASC;
         if (sort != null && !sort.isBlank()) {
             String[] parts = sort.split(",");
-            if (!SORT_FIELDS.contains(parts[0])) {
-                throw new IllegalArgumentException("지원하지 않는 정렬 필드입니다: " + parts[0]);
+            if (parts.length > 2 || !SORT_FIELDS.contains(parts[0])) {
+                throw new IllegalArgumentException("지원하지 않는 정렬 형식입니다: " + sort);
             }
             field = parts[0];
             if (parts.length > 1) {
+                if (!"asc".equalsIgnoreCase(parts[1]) && !"desc".equalsIgnoreCase(parts[1])) {
+                    throw new IllegalArgumentException("정렬 방향은 asc 또는 desc여야 합니다: " + parts[1]);
+                }
                 direction = "desc".equalsIgnoreCase(parts[1]) ? Sort.Direction.DESC : Sort.Direction.ASC;
             }
         }

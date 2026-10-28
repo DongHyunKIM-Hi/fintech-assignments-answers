@@ -27,6 +27,5 @@ public interface RefundRepository extends JpaRepository<Refund, Long> {
             + "and r.nextAttemptAt <= :now")
     List<String> findOrderIdsWithDueRefunds(@Param("now") Instant now);
 
-    Optional<Refund> findFirstByOrderIdAndStatusAndNextAttemptAtLessThanEqualOrderByRequestedAtAsc(
-            String orderId, RefundStatus status, Instant now);
+    Optional<Refund> findFirstByOrderIdAndStatusOrderByRequestedAtAsc(String orderId, RefundStatus status);
 }

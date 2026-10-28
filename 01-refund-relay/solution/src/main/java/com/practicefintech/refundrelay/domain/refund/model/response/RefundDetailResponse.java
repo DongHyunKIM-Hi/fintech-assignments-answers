@@ -5,6 +5,8 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 
 @Getter
 @AllArgsConstructor
@@ -16,8 +18,8 @@ public class RefundDetailResponse {
     private String status;
     private String failureReason;
     private int attemptCount;
-    private Instant requestedAt;
-    private Instant completedAt;
+    private LocalDateTime requestedAt;
+    private LocalDateTime completedAt;
 
     public static RefundDetailResponse from(Refund refund) {
         return new RefundDetailResponse(
@@ -27,8 +29,13 @@ public class RefundDetailResponse {
                 refund.getStatus().name(),
                 refund.getFailureReason() == null ? null : refund.getFailureReason().name(),
                 refund.getAttemptCount(),
-                refund.getRequestedAt(),
-                refund.getCompletedAt()
+                toLocal(refund.getRequestedAt()),
+                toLocal(refund.getCompletedAt())
         );
+    }
+
+    /** API 명세의 시각 예시(2026-09-21T10:00:00)와 같은 로컬 시각 형식으로 응답한다. */
+    private static LocalDateTime toLocal(Instant instant) {
+        return instant == null ? null : LocalDateTime.ofInstant(instant, ZoneId.systemDefault());
     }
 }

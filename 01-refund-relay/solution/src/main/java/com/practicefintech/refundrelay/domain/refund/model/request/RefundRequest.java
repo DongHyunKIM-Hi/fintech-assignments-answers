@@ -1,6 +1,5 @@
 package com.practicefintech.refundrelay.domain.refund.model.request;
 
-import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
@@ -20,11 +19,9 @@ public class RefundRequest {
     private String orderId;
 
     @Min(1)
-    @Max(100_000_000)
     private long paidAmount;
 
     @Min(1)
-    @Max(100_000_000)
     private long refundAmount;
 
     @Size(max = 200)

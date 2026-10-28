@@ -9,7 +9,6 @@ import com.practicefintech.refundrelay.domain.refund.model.response.RefundDuplic
 import com.practicefintech.refundrelay.domain.refund.model.response.RefundListResponse;
 import com.practicefintech.refundrelay.domain.refund.repository.RefundRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
@@ -63,29 +62,17 @@ public class RefundService {
         if (reserved + request.getRefundAmount() > request.getPaidAmount()) {
             Refund rejected = Refund.rejected(request.getRefundId(), request.getOrderId(),
                     request.getPaidAmount(), request.getRefundAmount(), request.getReason(), Instant.now());
-            saveNewRefund(rejected);
+            repository.saveAndFlush(rejected);
             return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(new ErrorResponse(
                     "REFUND_LIMIT_EXCEEDED", "환불 가능 금액을 초과했습니다.", request.getRefundId()));
         }
 
         Refund accepted = Refund.accepted(request.getRefundId(), request.getOrderId(),
                 request.getPaidAmount(), request.getRefundAmount(), request.getReason(), Instant.now());
-        saveNewRefund(accepted);
+        // 정상 경로에서는 orderId 락이 같은 refundId의 동시 삽입을 막는다. 락이 동작하지 않는
+        // 상황에서 유일 제약 위반이 나면 ApiExceptionHandler가 409로 응답한다.
+        repository.saveAndFlush(accepted);
         return ResponseEntity.status(HttpStatus.ACCEPTED).body(new RefundAcceptedResponse(request.getRefundId()));
-    }
-
-    /**
-     * 정상 경로에서는 orderId 락이 이미 같은 refundId의 동시 삽입을 막아 주므로
-     * 유일 제약 위반은 거의 일어나지 않는다. 위반이 발생하면 예외를 잡아
-     * 이미 저장된 요청으로 처리한다.
-     */
-    private void saveNewRefund(Refund refund) {
-        try {
-            repository.saveAndFlush(refund);
-        } catch (DataIntegrityViolationException e) {
-            // 이미 같은 refundId가 저장되어 있다는 뜻. 호출자 쪽에서 재조회하도록 그대로 둔다.
-            throw e;
-        }
     }
 
     public ResponseEntity<?> getOne(String refundId) {
