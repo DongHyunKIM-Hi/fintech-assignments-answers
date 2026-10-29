@@ -58,7 +58,8 @@ public class RefundWorker {
         }
     }
 
-    private void processOneAttempt(String orderId) {
+    /** 한 주문에 대해 한 번의 처리 시도. 테스트에서 직접 호출할 수 있도록 패키지 범위로 둔다. */
+    void processOneAttempt(String orderId) {
         // 주문에서 가장 오래된 미종결 건을 고른다. 이 건이 재시도 대기 중이면
         // 더 최근 건이 처리 가능하더라도 보내지 않는다. 접수 순서가 뒤집히기 때문이다.
         Optional<Refund> oldest = repository.findFirstByOrderIdAndStatusOrderByRequestedAtAsc(
