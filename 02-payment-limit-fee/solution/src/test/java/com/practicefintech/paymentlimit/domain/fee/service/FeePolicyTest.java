@@ -30,6 +30,7 @@ class FeePolicyTest {
             "BASIC, DOMESTIC, 1000000, 8000",
             "BASIC, DOMESTIC, 1000001, 8000",
             // 등급별 수수료율 (R3~R7)
+            "BASIC, OVERSEAS, 100000, 3000",
             "SILVER, DOMESTIC, 100000, 800",
             "GOLD, DOMESTIC, 100000, 500",
             "SILVER, OVERSEAS, 100000, 2400",
@@ -44,6 +45,8 @@ class FeePolicyTest {
             "BASIC, OVERSEAS, 100000000, 50000",
             // 우선순위 조합: 저액 VIP 해외는 R1(면제)이 R6보다 먼저
             "VIP, OVERSEAS, 500, 0",
+            // 적용 순서: 등급 배율(R5)을 먼저 적용한 뒤 고액 감면(R8). 역순이면 4,000원
+            "GOLD, DOMESTIC, 1000000, 3000",
     })
     void calculatesFeeAccordingToRuleTable(Grade grade, PayType payType, long amount, long expectedFee) {
         assertEquals(expectedFee, feePolicy.calculate(grade, payType, amount));
