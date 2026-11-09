@@ -63,12 +63,21 @@ public class PopularMenuService {
     private Map<Long, Long> loadCounts(LocalDate today) {
         try {
             List<LocalDate> dates = IntStream.range(0, DAYS).mapToObj(today::minusDays).toList();
-            return ranking.sumCounts(dates);
+            Map<Long, Long> counts = ranking.sumCounts(dates);
+            if (counts.isEmpty()) {
+                // Redis는 살아 있지만 집계 키가 비어 있는 경우(예: 데이터 유실)도 장애와 같이 취급해 폴백한다.
+                return fallbackToOrderTable(today);
+            }
+            return counts;
         } catch (RuntimeException e) {
             log.warn("Redis 인기 메뉴 집계를 읽지 못해 주문 테이블에서 직접 집계합니다.", e);
-            return orderRepository.countByMenuSince(today.minusDays(DAYS - 1).atStartOfDay()).stream()
-                    .collect(Collectors.toMap(OrderRepository.MenuOrderCount::getMenuId,
-                            OrderRepository.MenuOrderCount::getOrderCount));
+            return fallbackToOrderTable(today);
         }
+    }
+
+    private Map<Long, Long> fallbackToOrderTable(LocalDate today) {
+        return orderRepository.countByMenuSince(today.minusDays(DAYS - 1).atStartOfDay()).stream()
+                .collect(Collectors.toMap(OrderRepository.MenuOrderCount::getMenuId,
+                        OrderRepository.MenuOrderCount::getOrderCount));
     }
 }

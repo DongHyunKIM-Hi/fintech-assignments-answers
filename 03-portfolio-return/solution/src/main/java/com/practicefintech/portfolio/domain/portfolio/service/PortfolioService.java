@@ -91,8 +91,9 @@ public class PortfolioService {
 
         sortItems(items, sort);
 
-        int fromIndex = Math.min(page * size, items.size());
-        int toIndex = Math.min(fromIndex + size, items.size());
+        // page*size가 int 범위를 넘을 수 있어 long으로 계산한 뒤 clamp한다.
+        int fromIndex = (int) Math.min((long) page * size, items.size());
+        int toIndex = (int) Math.min((long) fromIndex + size, items.size());
         List<PortfolioListItem> pageItems = items.subList(fromIndex, toIndex);
         int totalPages = size == 0 ? 0 : (int) Math.ceil(items.size() / (double) size);
         return new PageResponse<>(pageItems, page, size, items.size(), totalPages);

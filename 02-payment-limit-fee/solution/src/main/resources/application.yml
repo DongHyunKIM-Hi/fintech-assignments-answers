@@ -4,3 +4,7 @@ server:
 spring:
   application:
     name: payment-limit-solution
+  jackson:
+    deserialization:
+      # 10.5처럼 소수가 들어온 금액을 1로 잘라 받지 않고 400으로 거절한다
+      accept-float-as-int: false

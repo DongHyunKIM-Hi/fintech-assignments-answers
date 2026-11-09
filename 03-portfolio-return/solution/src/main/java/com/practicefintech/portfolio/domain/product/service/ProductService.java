@@ -45,6 +45,12 @@ public class ProductService {
         }
 
         Sort sortOrder = parseSort(sort);
+
+        // page*size가 너무 크면 Spring Data가 offset 계산에서 예외를 던지므로, 미리 빈 페이지로 응답한다.
+        if ((long) page * size > Integer.MAX_VALUE) {
+            return new PageResponse<>(List.of(), page, size, 0, 0);
+        }
+
         var pageResult = repository.findAll(spec, PageRequest.of(page, size, sortOrder));
 
         List<ProductResponse> items = pageResult.getContent().stream()
@@ -73,6 +79,10 @@ public class ProductService {
         }
         // 위험등급이 비어 있는(null) 상품은 정렬에서 맨 뒤로 보낸다 (가정 G5).
         Sort.Order order = new Sort.Order(direction, field, Sort.NullHandling.NULLS_LAST);
-        return Sort.by(order);
+        // code를 2차 키로 둬야 같은 값끼리의 순서가 페이지마다 달라지지 않는다.
+        if (field.equals("code")) {
+            return Sort.by(order);
+        }
+        return Sort.by(order, Sort.Order.asc("code"));
     }
 }

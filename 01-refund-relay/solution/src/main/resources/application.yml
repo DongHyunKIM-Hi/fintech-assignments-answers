@@ -10,6 +10,10 @@ spring:
     hibernate:
       ddl-auto: update
     open-in-view: false
+  jackson:
+    deserialization:
+      # 10.5처럼 소수가 들어온 금액을 10으로 잘라 받지 않고 400으로 거절한다
+      accept-float-as-int: false
 
 # 가상 결제대행사 연동 설정. prefix를 pg로 정한 이유는 PgClientProperties 주석 참고
 # (환경변수 PG_BASE_URL과 정확히 대응해야 함)

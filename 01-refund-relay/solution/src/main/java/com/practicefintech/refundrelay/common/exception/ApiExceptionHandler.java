@@ -30,4 +30,18 @@ public class ApiExceptionHandler {
         return ResponseEntity.status(HttpStatus.CONFLICT)
                 .body(new ErrorResponse("REFUND_ID_CONFLICT", "동시 요청으로 이미 접수되었습니다. 다시 조회해 주세요.", null));
     }
+
+    /**
+     * 없는 경로(404)나 지원하지 않는 메서드·미디어 타입(405, 415)처럼 Spring이 상태 코드를 정해 둔 예외는
+     * 그 코드를 그대로 쓰고, 나머지는 500으로 응답한다. 둘 다 5-1의 {code, message} 형식을 따른다.
+     */
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ErrorResponse> handleOthers(Exception e) {
+        if (e instanceof org.springframework.web.ErrorResponse springError) {
+            return ResponseEntity.status(springError.getStatusCode())
+                    .body(new ErrorResponse("INVALID_REQUEST", "지원하지 않는 요청입니다.", null));
+        }
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(new ErrorResponse("INTERNAL_ERROR", "일시적인 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.", null));
+    }
 }
