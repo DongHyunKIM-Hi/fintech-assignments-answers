@@ -31,7 +31,7 @@
   - `common/{entity,enums,exception,config,utils,dto}`
   - `domain/<기능>/{controller,service,repository,model/{request,response,dto}}`
 - DTO는 record 대신 Lombok(`@Getter`, `@AllArgsConstructor` 등)을 사용한 일반 클래스로 작성했습니다.
-- 지원자에게 시작 코드(starter-project)를 제공하는 과제 2, 4도 같은 구조를 사용합니다.
+- 다섯 과제 모두 지원자에게 시작 코드(starter-project)를 제공하며, 같은 구조를 사용합니다.
 - 과제 5는 분산 락 실행기를 `common/lock/`에 두었습니다.
 
 ## 과제별 요약
@@ -65,6 +65,7 @@
    docker run -p 9091:9091 -e ADMIN_ENABLED=true -e ADMIN_TOKEN=admin-secret ghcr.io/donghyunkim-hi/portfolio-price-server:1.1.0
    ```
 4. 지원자가 바뀔 때마다 `POST /admin/reset`으로 가상 서버를 초기화하고, **지원자 서버도 새로 실행**합니다. 서버를 재시작하지 않으면 이전 채점의 데이터가 남아 중복 응답이 나옵니다.
+   - 과제 3의 `reset`은 **일시 장애율을 기본값 5%로 되돌립니다.** 초기화한 뒤에는 `POST /admin/failure` 본문 `{"mode":"NONE","transientFailureRate":0}`을 다시 보내세요. 끄지 않으면 정상 제출물도 S9·S10에서 운에 따라 떨어집니다.
 
 | 과제 | 채점에 필요한 것 |
 |---|---|
