@@ -46,6 +46,10 @@ SERVER_PORT=8081 ./gradlew bootRun
 
 - 없는 경로(404)나 지원하지 않는 메서드(405)도 같은 형식으로 응답합니다.
 - 금액에 `10.5`처럼 소수가 오면 잘라서 받지 않고 400으로 거절합니다(`spring.jackson.deserialization.accept-float-as-int: false`).
+- 아래 세 가지는 **정답 서버가 스스로 정한 추가 규칙이며 채점 기준이 아닙니다.** 지원자 README와 평가 기준표에는 없으므로, 지원자가 다르게 정했다고 감점하지 않습니다.
+  - 1회 충전 한도 100만 원 (`ChargePointRequest`)
+  - 소수 금액 충전을 400으로 거절 (위 줄)
+  - 포인트 행이 없는 사용자의 주문을 409 `INSUFFICIENT_POINT`로 처리 (`OrderService`)
 
 ### ERD
 
@@ -129,7 +133,7 @@ H2나 가짜 객체로는 분산 락과 Redis 집계를 확인할 수 없어서,
 | `OrderServiceTest` | 6 | 주문과 차감, 포인트 부족, 없는 메뉴, 3잔 값으로 동시 주문 10건, 충전과 주문이 섞인 동시 요청, 다른 사용자 20명 동시 주문 |
 | `OrderRollbackTest` | 1 | 이벤트 저장이 실패하면 포인트 차감과 주문 저장까지 롤백 |
 | `PopularMenuServiceTest` | 3 | 상위 3개와 동점 처리, 최근 7일 범위, 동시 주문 50건의 횟수 정확성 |
-| `PopularMenuFallbackTest` | 1 | Redis 장애에도 결제 유지, 주문 테이블 집계로 대신 응답 |
+| `PopularMenuFallbackTest` | 1 | **인기 메뉴 집계(Redis)만 실패**해도 결제는 유지되고, 조회는 주문 테이블 집계로 대신 응답 |
 | `OrderEventSenderTest` | 1 | 커밋 직후 데이터 수집 플랫폼으로 전송 |
 | `OrderEventRetryTest` | 1 | 전송 실패 시 `PENDING`으로 남고 재전송으로 `SENT` |
 | `MultiInstanceTest` | 2 | 서버를 하나 더 띄워 두 서버에 충전 100건, 주문 10건을 나눠 보냄 |
