@@ -1,0 +1,22 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: refund-relay
+  datasource:
+    url: jdbc:h2:mem:refundrelay;DB_CLOSE_DELAY=-1
+  jpa:
+    hibernate:
+      ddl-auto: update
+    open-in-view: false
+
+# 가상 결제대행사 연동 설정. prefix를 pg로 정한 이유는 PgClientProperties 주석 참고
+# (환경변수 PG_BASE_URL과 정확히 대응해야 함)
+pg:
+  base-url: http://localhost:9090
+
+# 처리 워커 설정. 1단계는 "얼마나 자주 돌릴지"만 있으면 된다.
+# 재시도 횟수, 재시도 간격, 스레드 풀 크기는 2단계에서 추가한다.
+worker:
+  tick-interval-ms: 300

@@ -1,0 +1,23 @@
+server:
+  port: ${SERVER_PORT:8080}
+
+spring:
+  application:
+    name: coffee-order-step1
+  datasource:
+    url: jdbc:mysql://${DB_HOST:localhost}:3306/coffee?serverTimezone=Asia/Seoul
+    username: ${DB_USERNAME:root}
+    password: ${DB_PASSWORD:root}
+  jpa:
+    hibernate:
+      ddl-auto: none
+    open-in-view: false
+  sql:
+    init:
+      mode: always
+
+# 1단계에서 일부러 넣지 않은 설정
+# - spring.jackson.deserialization.accept-float-as-int: false
+#   (없으면 10.5 같은 소수 금액이 10으로 잘려서 그대로 충전된다. → 2단계)
+# - spring.data.redis.*  (Redis는 3단계에서 분산 락과 인기 메뉴 집계에 쓴다)
+# - coffee.lock-wait-millis, coffee.outbox-*  (3단계)

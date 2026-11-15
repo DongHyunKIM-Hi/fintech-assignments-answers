@@ -1,0 +1,24 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: portfolio-step1
+  datasource:
+    url: jdbc:h2:mem:portfolio;DB_CLOSE_DELAY=-1
+  jpa:
+    hibernate:
+      ddl-auto: update
+    open-in-view: false
+
+# 가상 시세 서버 연동 설정. prefix가 "price"인 이유는 PriceClientProperties 주석 참고
+# (환경변수 PRICE_BASE_URL과 정확히 대응해야 함)
+# 1단계에 없는 설정: refresh-interval-ms(주기 갱신), token-refresh-margin-seconds(토큰 재사용) — 3단계에서 추가
+price:
+  base-url: http://localhost:9091
+  client-id: client
+  client-secret: client-secret
+  call-timeout-ms: 3000
+
+products:
+  csv-path: data/products.csv

@@ -1,0 +1,8 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: payment-limit-step1
+# [1단계: 정상 경로] 입력 검증과 관련된 설정은 아직 넣지 않습니다.
+# 최종본에는 10.5 같은 소수 금액을 400으로 거절하기 위한 jackson 설정이 들어갑니다. (2단계)
