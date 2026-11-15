@@ -199,7 +199,8 @@ public class PortfolioService {
             portfolio.setTodayBaseline(roundedValue, today);
         }
         BigDecimal baseline = portfolio.getTodayBaselineValue() == null ? roundedCost : portfolio.getTodayBaselineValue();
-        BigDecimal todayProfit = roundedValue.subtract(baseline);
+        // DB에서 읽어 온 기준값은 컬럼 스케일(2)을 그대로 들고 오므로, 금액 규칙에 맞게 정수로 맞춘 뒤 뺀다.
+        BigDecimal todayProfit = roundedValue.subtract(baseline.setScale(0, RoundingMode.DOWN));
 
         Instant asOf = priceSnapshotStore.getAsOf();
         boolean stale = priceSnapshotStore.isStale();
