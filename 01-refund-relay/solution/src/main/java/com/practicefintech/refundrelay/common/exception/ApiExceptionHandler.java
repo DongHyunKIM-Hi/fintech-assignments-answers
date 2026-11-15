@@ -17,13 +17,14 @@ public class ApiExceptionHandler {
     @ExceptionHandler({MethodArgumentNotValidException.class, ConstraintViolationException.class,
             HttpMessageNotReadableException.class, MissingServletRequestParameterException.class})
     public ResponseEntity<ErrorResponse> handleInvalidRequest(Exception e) {
+        // 예외 메시지를 그대로 내보내면 내부 클래스 이름까지 노출되므로 고정 문구를 쓴다.
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body(new ErrorResponse("INVALID_REQUEST", e.getMessage(), null));
+                .body(new ErrorResponse("INVALID_REQUEST", "요청 형식이 올바르지 않습니다.", null));
     }
 
     /**
-     * 정상 경로에서는 orderId 락이 먼저 막으므로 거의 발생하지 않는다.
-     * 유일 제약 위반이 발생하면 이미 존재하는 요청으로 처리한다.
+     * 접수 경로의 유일 제약 위반은 RefundService가 직접 잡아 200(duplicate)으로 돌려주므로
+     * 여기까지 오지 않는다. 그 밖의 경로에서 제약 위반이 나올 때를 위한 안전망이다.
      */
     @ExceptionHandler(DataIntegrityViolationException.class)
     public ResponseEntity<ErrorResponse> handleDuplicateInsert(DataIntegrityViolationException e) {

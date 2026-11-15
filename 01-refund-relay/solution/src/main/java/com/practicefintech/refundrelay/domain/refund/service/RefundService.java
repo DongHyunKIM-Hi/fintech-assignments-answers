@@ -9,6 +9,7 @@ import com.practicefintech.refundrelay.domain.refund.model.response.RefundDuplic
 import com.practicefintech.refundrelay.domain.refund.model.response.RefundListResponse;
 import com.practicefintech.refundrelay.domain.refund.repository.RefundRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
@@ -53,9 +54,7 @@ public class RefundService {
                 return ResponseEntity.status(HttpStatus.CONFLICT).body(new ErrorResponse(
                         "REFUND_ID_CONFLICT", "이미 존재하는 요청 ID이며 내용이 다릅니다.", request.getRefundId()));
             }
-            String failureReason = refund.getFailureReason() == null ? null : refund.getFailureReason().name();
-            return ResponseEntity.ok(new RefundDuplicateResponse(
-                    refund.getRefundId(), refund.getStatus().name(), failureReason));
+            return duplicateResponse(refund);
         }
 
         long reserved = repository.sumReservedAmount(request.getOrderId());
@@ -69,10 +68,29 @@ public class RefundService {
 
         Refund accepted = Refund.accepted(request.getRefundId(), request.getOrderId(),
                 request.getPaidAmount(), request.getRefundAmount(), request.getReason(), Instant.now());
-        // 정상 경로에서는 orderId 락이 같은 refundId의 동시 삽입을 막는다. 락이 동작하지 않는
-        // 상황에서 유일 제약 위반이 나면 ApiExceptionHandler가 409로 응답한다.
-        repository.saveAndFlush(accepted);
+        try {
+            repository.saveAndFlush(accepted);
+        } catch (DataIntegrityViolationException e) {
+            // 유일 제약이 막은 경우. 락이 듣지 않는 상황(서버 여러 대 등)에서만 일어난다.
+            // 계약(S4)은 이때도 중복 요청과 같이 기존 건의 상태를 200으로 돌려주도록 정했다.
+            return duplicateResponse(request);
+        }
         return ResponseEntity.status(HttpStatus.ACCEPTED).body(new RefundAcceptedResponse(request.getRefundId()));
+    }
+
+    /** 같은 내용의 재요청(S2, S4)에 돌려주는 200 응답. 기존 건의 현재 상태를 그대로 보여 준다. */
+    private ResponseEntity<?> duplicateResponse(Refund refund) {
+        String failureReason = refund.getFailureReason() == null ? null : refund.getFailureReason().name();
+        return ResponseEntity.ok(new RefundDuplicateResponse(
+                refund.getRefundId(), refund.getStatus().name(), failureReason));
+    }
+
+    /** 유일 제약이 막은 직후, 먼저 저장된 건을 다시 읽어 200으로 돌려준다. */
+    private ResponseEntity<?> duplicateResponse(RefundRequest request) {
+        return repository.findByRefundId(request.getRefundId())
+                .map(this::duplicateResponse)
+                .orElseGet(() -> ResponseEntity.status(HttpStatus.CONFLICT).body(new ErrorResponse(
+                        "REFUND_ID_CONFLICT", "동시 요청으로 이미 접수되었습니다. 다시 조회해 주세요.", request.getRefundId())));
     }
 
     public ResponseEntity<?> getOne(String refundId) {
