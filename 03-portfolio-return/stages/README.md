@@ -163,6 +163,8 @@ docker run -p 9091:9091 ghcr.io/donghyunkim-hi/portfolio-price-server:1.1.0   # 
   curl -X POST localhost:9091/admin/fx      -H 'X-Admin-Token: admin-secret' \
        -H 'Content-Type: application/json' -d '{"rate":1350.25,"freeze":true}'
   ```
-  `freeze: true`는 지정하지 않은 코드까지 현재 값으로 함께 고정합니다.
+  `freeze: true`는 **지정한 코드만** 고정합니다. 나머지 119개는 30초마다 계속 바뀝니다
+  (실측: A001·A052는 80초간 그대로, A002·A003은 계속 변동). 환율 `freeze`는 전체에 적용됩니다.
+  상품 목록을 화면에 펼쳐 보일 때 지정하지 않은 상품의 `currentPrice`가 움직이는 것은 정상입니다.
 - 1·2단계에는 `PriceClient.issueToken()`에 `시세 서버 토큰을 새로 발급받았습니다.` 로그를 남겨 두었습니다.
   발급 횟수를 화면에서 바로 셀 수 있습니다.
