@@ -6,7 +6,7 @@
 ## 실행
 
 ```bash
-docker run -p 9091:9091 ghcr.io/donghyunkim-hi/portfolio-price-server:1.1.0   # 가상 시세 서버
+docker run -p 9091:9091 ghcr.io/donghyunkim-hi/portfolio-price-server:1.2.0   # 가상 시세 서버
 ./gradlew bootRun                                                            # 포트 8080
 ```
 

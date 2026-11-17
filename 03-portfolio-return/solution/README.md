@@ -7,7 +7,7 @@
 
 ```bash
 # 1) 가상 시세 서버 실행 (포트 9091)
-docker run -p 9091:9091 ghcr.io/donghyunkim-hi/portfolio-price-server:1.1.0
+docker run -p 9091:9091 ghcr.io/donghyunkim-hi/portfolio-price-server:1.2.0
 
 # 2) 정답 서버 실행 (포트 8080)
 ./gradlew bootRun
