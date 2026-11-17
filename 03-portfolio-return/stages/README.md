@@ -74,7 +74,7 @@ docker run -p 9091:9091 ghcr.io/donghyunkim-hi/portfolio-price-server:1.2.0   # 
 | 통화·상장일 | 조회 결과 전부 `KRW`/`USD`, `yyyy-MM-dd` |
 | `query=성장` / `query=a001` / `query=dividend` | **7건 / 1건 / 9건** (대소문자 무시) |
 | `type=ETF&currency=KRW` / `riskLevel=5` | **35건 / 21건** |
-| `sort=riskLevel,asc` 마지막 페이지 | 맨 뒤 6건이 모두 위험등급 `null` (가정 G5의 NULLS_LAST) |
+| `sort=riskLevel,asc` 마지막 페이지 | 맨 뒤 **8건**이 모두 위험등급 `null` (가정 G5의 NULLS_LAST). CSV의 빈 위험등급 8행은 중복 코드 10개와 겹치지 않아 정리 후에도 그대로 남습니다 |
 | `size=0`, `size=101`, `page=-1`, `sort=hack,asc`, `sort=code,sideways`, `type=STOCK`, `currency=EUR`, `riskLevel=abc` | **전부 400 `INVALID_REQUEST`** |
 | 없는 상품 코드 | **400 `UNKNOWN_PRODUCT`** |
 | 수량 0 / 1,000,001 / 1.5, 이름 `""` / 51자, `holdings` 0개 / 21개 | **전부 400 `INVALID_REQUEST`** |
@@ -86,7 +86,7 @@ docker run -p 9091:9091 ghcr.io/donghyunkim-hi/portfolio-price-server:1.2.0   # 
 | `PUT`으로 10주 → 20주 (가정 G1) | 평균 단가 **1100** = (10×1000 + 10×1200)/20 |
 | 목록 `query=내` / `sort=name,asc` / `page=1&size=2` | 2건 / 이름순 / `totalPages` 2 — 정상 |
 | **시세 서버 `ALWAYS_503`** | **상품 조회·상세·목록 모두 500** — 아직 깨집니다 (R6·S11 위반) |
-| **API 요청 4번 동안 토큰 발급** | **7회** — 아직 깨집니다 (S10 위반) |
+| **API 요청 4번 동안 토큰 발급** | **8회** — 요청마다 시세와 환율을 따로 받아 오고 그때마다 발급합니다. 3회 측정 모두 8회 (S10 위반) |
 | 시세 변경이 반영되기까지 | **0.6초** — 빠르지만 요청마다 외부를 부르기 때문입니다 |
 | `GET /api/v1/products?size=20` 응답 시간 | **0.076 \~ 0.214초** |
 
@@ -114,12 +114,12 @@ docker run -p 9091:9091 ghcr.io/donghyunkim-hi/portfolio-price-server:1.2.0   # 
 | 확인 | 결과 |
 |---|---|
 | 계산 결과 | 2단계와 동일 (`totalCost` 64118 → 시세 변경 후 `totalValue` 68710, `returnRate` 7.16) |
-| 시세 변경 반영 | **20.6초** (30초 주기 안, S9 기준 45초 통과) |
-| 토큰 수명(120초)이 지난 뒤 시세 변경 | **30.4초 만에 반영** — 갱신이 계속됨 (S10) |
+| 시세 변경 반영 | **0~30초** (갱신 주기가 30초라 변경 시점에 따라 달라집니다. 3회 측정 4.9 / 15.0 / 28.9초. S9 기준 45초는 항상 통과) |
+| 토큰 수명(120초)이 지난 뒤 시세 변경 | 갱신이 계속됩니다. 반영 시간은 위와 같은 이유로 0~30초입니다 (S10) |
 | 시세 서버 `ALWAYS_503` 중 GET | 상품 조회·상세·목록 **전부 200** |
 | 장애 중 생성(POST) | **201** (마지막 스냅샷으로 담김) |
-| 장애 4.1초 뒤 상세 응답 | `"priceStale": true` 표시 (가정 G4) |
-| `GET /api/v1/products?size=20` 응답 시간 | **0.003 \~ 0.007초** (2단계 0.076\~0.214초) |
+| 장애 중 상세 응답 | 다음 갱신이 실패해야 알 수 있으므로 **최대 30초 뒤** `"priceStale": true`로 바뀝니다(실측 30.2초, 가정 G4) |
+| `GET /api/v1/products?size=20` 응답 시간 | **0.003 \~ 0.008초** (2단계 0.076\~0.214초) |
 
 > 촬영 포인트: 2단계로 되돌려 같은 `ALWAYS_503` 명령을 다시 실행하면 500과 200이 바로 대비됩니다.
 > 응답 시간 차이(0.2초 → 0.003초)도 같은 화면에서 보여 줄 수 있습니다.
