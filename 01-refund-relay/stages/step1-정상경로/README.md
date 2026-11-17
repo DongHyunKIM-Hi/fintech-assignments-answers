@@ -28,7 +28,7 @@
 
 ```bash
 # 가상 결제대행사
-docker run -p 9090:9090 ghcr.io/donghyunkim-hi/pg-mock:1.1.0
+docker run -p 9090:9090 ghcr.io/donghyunkim-hi/pg-mock:1.1.1
 
 # 환불 서버
 ./gradlew bootRun

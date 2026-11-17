@@ -12,7 +12,7 @@
 실행은 어느 폴더에서든 같습니다.
 
 ```bash
-docker run -p 9090:9090 ghcr.io/donghyunkim-hi/pg-mock:1.1.0   # 가상 결제대행사
+docker run -p 9090:9090 ghcr.io/donghyunkim-hi/pg-mock:1.1.1   # 가상 결제대행사
 ./gradlew bootRun                                               # 환불 서버
 ```
 
