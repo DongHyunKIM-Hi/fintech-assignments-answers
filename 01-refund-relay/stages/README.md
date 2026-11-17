@@ -12,7 +12,7 @@
 실행은 어느 폴더에서든 같습니다.
 
 ```bash
-docker run -p 9090:9090 ghcr.io/donghyunkim-hi/pg-mock:1.0.0   # 가상 결제대행사
+docker run -p 9090:9090 ghcr.io/donghyunkim-hi/pg-mock:1.1.0   # 가상 결제대행사
 ./gradlew bootRun                                               # 환불 서버
 ```
 
@@ -68,7 +68,7 @@ docker run -p 9090:9090 ghcr.io/donghyunkim-hi/pg-mock:1.0.0   # 가상 결제�
 | 재시도 (`FAIL` → `FAIL` → `SUCCESS`) | `attemptCount: 3`, `COMPLETED` (3.6초) |
 | 최종 실패 (`FAIL` 4회) | `FAILED` + `PG_DECLINED`, `attemptCount: 4` (7.7초) |
 | 5xx 4회 | `FAILED` + `PG_ERROR`, `attemptCount: 4` (9.1초) |
-| 12초 지연 4회 | 5초마다 끊고 재시도 → `FAILED` + `PG_TIMEOUT`, `attemptCount: 4` (23.7초, 60초 제한 안) |
+| 12초 지연 4회 | 5초마다 끊고 재시도 → `FAILED` + `PG_TIMEOUT`, `attemptCount: 4` (23.7초, 30초 기준 안) |
 | 지연됐지만 실제로는 처리됨 (S12) | 5초에 시간 초과 → 같은 ID로 재시도 → `attemptCount: 2`로 `COMPLETED`, 결제대행사 처리 기록 **1건** |
 | 느린 건이 있을 때 다른 주문 | 0.9초에 `COMPLETED` — 1단계에서 13초 밀리던 것이 해결됨 |
 | **같은 환불 ID로 동시 5건** | **5건 모두 202, DB에 5건 저장** → 단건 조회 **500** — 아직 깨집니다 |

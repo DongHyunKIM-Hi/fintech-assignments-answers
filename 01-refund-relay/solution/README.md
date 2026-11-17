@@ -8,7 +8,7 @@
 
 ```bash
 # 1) 가상 결제대행사 실행 (포트 9090)
-docker run -p 9090:9090 ghcr.io/donghyunkim-hi/pg-mock:1.0.0
+docker run -p 9090:9090 ghcr.io/donghyunkim-hi/pg-mock:1.1.0
 
 # 2) 정답 서버 실행 (포트 8080)
 ./gradlew bootRun
