@@ -12,7 +12,7 @@
 | 2. 결제 한도 차감 및 수수료 정책 | [payment-limit-fee-assignment](https://github.com/DongHyunKIM-Hi/payment-limit-fee-assignment) | [`02-payment-limit-fee/`](02-payment-limit-fee/) |
 | 3. 가상 포트폴리오 수익률 서비스 | [portfolio-return-assignment](https://github.com/DongHyunKIM-Hi/portfolio-return-assignment) | [`03-portfolio-return/`](03-portfolio-return/) |
 | 4. 쿠폰 사용과 회의실 예약 (동시성 워밍업) | [concurrency-warmup-assignment](https://github.com/DongHyunKIM-Hi/concurrency-warmup-assignment) | [`04-concurrency-warmup/`](04-concurrency-warmup/) |
-| 5. 커피숍 주문 시스템 | [coffee-order-assignment](https://github.com/DongHyunKIM-Hi/coffee-order-assignment) | [`05-coffee-order/`](05-coffee-order/) |
+| 5. 카페 주문 시스템 | [coffee-order-assignment](https://github.com/DongHyunKIM-Hi/coffee-order-assignment) | [`05-coffee-order/`](05-coffee-order/) |
 
 - 지원자용 요구사항 요약 PDF는 각 지원자 저장소의 `docs/requirements-overview.pdf`에 있습니다.
 

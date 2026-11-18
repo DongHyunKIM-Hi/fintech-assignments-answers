@@ -6,7 +6,7 @@ plugins {
 
 group = 'com.practicefintech.coffee'
 version = '0.0.1-SNAPSHOT'
-description = '과제 5. 커피숍 주문 시스템 - 정답 서버'
+description = '과제 5. 카페 주문 시스템 - 정답 서버'
 
 java {
 	toolchain {
