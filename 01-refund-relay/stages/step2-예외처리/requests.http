@@ -1,0 +1,268 @@
+### 2단계(예외 처리) 확인용 요청 모음 (IntelliJ HTTP Client 형식)
+### 사용법: 위에서부터 차례로, 각 ### 블록 왼쪽의 초록 화살표를 눌러 실행합니다.
+### 전제: 가상 결제대행사(9090)가 떠 있고, 이 폴더(step2)의 서버가 8080으로 실행 중이어야 합니다.
+###   docker run -p 9090:9090 ghcr.io/donghyunkim-hi/pg-mock:1.1.1
+###   ./gradlew bootRun
+###
+### 주의
+### - 이 파일은 비어 있는 서버 기준입니다. 같은 블록을 두 번째로 실행하면 환불 ID가 이미 있어서
+###   202 대신 200(duplicate:true)이 나옵니다. 정상입니다. 처음부터 다시 보려면 서버를 재시작하세요
+###   (메모리 DB라 데이터가 지워집니다). 결제대행사는 [0] reset을 다시 누르면 됩니다.
+### - 처리(워커) 확인 블록은 "상황 지정 → 접수 → 몇 초 뒤 조회" 순서입니다. 접수보다 먼저
+###   상황을 지정해야 결과가 고정됩니다. reset을 누르면 지정해 둔 상황도 함께 풀립니다.
+### - 2단계에서 아직 안 되는 것(동시 요청 안전성, 같은 주문의 순서)은 동시 전송이 필요해서
+###   이 파일로는 재현할 수 없습니다. 대본의 터미널 명령 [동시 1], [동시 2], [순서]를 쓰세요.
+
+@host = http://localhost:8080
+@pg = http://localhost:9090
+
+### [0] 결제대행사 초기화 — 처음 시작할 때, 또는 처음부터 다시 볼 때 1번만
+POST {{pg}}/sandbox/reset
+
+
+### ==================================================================
+### 1부. 접수 분기 — S1(202) → S2(200) → S3(409) → S5(422) → 거절 재요청(200)
+### ==================================================================
+
+### [1] R-1001의 결제대행사 응답을 성공으로 고정 (다음 블록들의 결과를 흔들리지 않게)
+POST {{pg}}/sandbox/scenario
+Content-Type: application/json
+
+{ "refundId": "R-1001", "case": "SUCCESS" }
+
+### [2] S1. 정상 접수 — 기대: 202, status ACCEPTED. 응답이 빨라야 합니다(결제대행사를 기다리지 않음)
+POST {{host}}/api/v1/refunds
+Content-Type: application/json
+
+{
+  "refundId": "R-1001",
+  "orderId": "ORD-2001",
+  "paidAmount": 10000,
+  "refundAmount": 3000,
+  "reason": "단순 변심"
+}
+
+### [3] S2. 같은 ID, 같은 내용(사유만 다름) — 기대: 200, duplicate:true
+POST {{host}}/api/v1/refunds
+Content-Type: application/json
+
+{
+  "refundId": "R-1001",
+  "orderId": "ORD-2001",
+  "paidAmount": 10000,
+  "refundAmount": 3000,
+  "reason": "사유만 다름"
+}
+
+### [4] S3. 같은 ID, 다른 금액 — 기대: 409 REFUND_ID_CONFLICT
+POST {{host}}/api/v1/refunds
+Content-Type: application/json
+
+{
+  "refundId": "R-1001",
+  "orderId": "ORD-2001",
+  "paidAmount": 10000,
+  "refundAmount": 9999
+}
+
+### [5] S5. 한도 초과 — 기대: 422 REFUND_LIMIT_EXCEEDED (3,000 + 8,000 > 10,000)
+### R-1001을 [1]에서 성공으로 고정했으므로 합계에서 빠지는 일이 없습니다.
+POST {{host}}/api/v1/refunds
+Content-Type: application/json
+
+{
+  "refundId": "R-1002",
+  "orderId": "ORD-2001",
+  "paidAmount": 10000,
+  "refundAmount": 8000
+}
+
+### [6] 거절됐던 ID로 같은 내용 재요청 — 기대: 200, duplicate:true, status REJECTED
+### 거절도 REJECTED로 저장되기 때문입니다. (422가 다시 나오지 않습니다)
+POST {{host}}/api/v1/refunds
+Content-Type: application/json
+
+{
+  "refundId": "R-1002",
+  "orderId": "ORD-2001",
+  "paidAmount": 10000,
+  "refundAmount": 8000
+}
+
+
+### ==================================================================
+### 2부. 입력 오류(S7) — 전부 400 INVALID_REQUEST, 저장되지 않음
+### ==================================================================
+
+### [7] 금액 0
+POST {{host}}/api/v1/refunds
+Content-Type: application/json
+
+{
+  "refundId": "R-1003",
+  "orderId": "ORD-2001",
+  "paidAmount": 10000,
+  "refundAmount": 0
+}
+
+### [8] 금액 음수
+POST {{host}}/api/v1/refunds
+Content-Type: application/json
+
+{
+  "refundId": "R-1004",
+  "orderId": "ORD-2001",
+  "paidAmount": 10000,
+  "refundAmount": -1000
+}
+
+### [9] 필수값(refundId) 누락
+POST {{host}}/api/v1/refunds
+Content-Type: application/json
+
+{
+  "orderId": "ORD-2001",
+  "paidAmount": 10000,
+  "refundAmount": 1000
+}
+
+
+### ==================================================================
+### 3부. 조회 — 단건, 404, 주문별 목록(S13)
+### ==================================================================
+
+### [10] 단건 조회 — 기대: R-1001은 COMPLETED(attemptCount 1). 접수 직후라면 잠깐 ACCEPTED
+GET {{host}}/api/v1/refunds/R-1001
+
+### [11] 없는 ID 조회 — 기대: 404 REFUND_NOT_FOUND
+GET {{host}}/api/v1/refunds/NO-SUCH-ID
+
+### [12] 주문별 목록 — 기대: 200, 최신순. ORD-2001에는 2건(R-1002 REJECTED, R-1001 COMPLETED)
+GET {{host}}/api/v1/refunds?orderId=ORD-2001&page=0&size=20
+
+### [13] orderId 없이 목록 — 기대: 400 INVALID_REQUEST
+GET {{host}}/api/v1/refunds
+
+
+### ==================================================================
+### 4부. 처리 규칙 — 재시도(최대 4회, 간격 0.5초→1초→2초), 응답 대기 5초
+### 케이스마다 "상황 지정 → 접수 → 몇 초 뒤 조회" 세 번 클릭입니다.
+### ==================================================================
+
+### [14] S8. 성공: 상황 지정
+POST {{pg}}/sandbox/scenario
+Content-Type: application/json
+
+{ "refundId": "R-2001", "case": "SUCCESS" }
+
+### [15] S8. 접수 — 기대: 202
+POST {{host}}/api/v1/refunds
+Content-Type: application/json
+
+{
+  "refundId": "R-2001",
+  "orderId": "ORD-3001",
+  "paidAmount": 10000,
+  "refundAmount": 1000
+}
+
+### [16] S8. 1초쯤 뒤 조회 — 기대: COMPLETED, attemptCount 1
+GET {{host}}/api/v1/refunds/R-2001
+
+### [17] S9. 재시도 후 성공: 상황 지정
+POST {{pg}}/sandbox/scenario
+Content-Type: application/json
+
+{ "refundId": "R-2002", "case": "RETRY_THEN_SUCCESS" }
+
+### [18] S9. 접수 — 기대: 202
+POST {{host}}/api/v1/refunds
+Content-Type: application/json
+
+{
+  "refundId": "R-2002",
+  "orderId": "ORD-3002",
+  "paidAmount": 10000,
+  "refundAmount": 1000
+}
+
+### [19] S9. 3초쯤 뒤 조회 — 기대: COMPLETED, attemptCount 2 (실측 2.8~3.2초)
+GET {{host}}/api/v1/refunds/R-2002
+
+### [20] S9. 끝까지 실패: 상황 지정
+POST {{pg}}/sandbox/scenario
+Content-Type: application/json
+
+{ "refundId": "R-2003", "case": "ALWAYS_FAIL" }
+
+### [21] 접수 — 기대: 202
+POST {{host}}/api/v1/refunds
+Content-Type: application/json
+
+{
+  "refundId": "R-2003",
+  "orderId": "ORD-3003",
+  "paidAmount": 10000,
+  "refundAmount": 1000
+}
+
+### [22] 8초쯤 뒤 조회 — 기대: FAILED, PG_DECLINED, attemptCount 4 (실측 7.3~7.8초)
+### 그 전에 누르면 ACCEPTED로 보입니다. 재시도 간격 0.5+1+2초가 다 지나야 종결됩니다.
+GET {{host}}/api/v1/refunds/R-2003
+
+### [23] S10. 계속 응답 지연: 상황 지정
+POST {{pg}}/sandbox/scenario
+Content-Type: application/json
+
+{ "refundId": "R-2004", "case": "ALWAYS_TIMEOUT" }
+
+### [24] 접수 — 기대: 202
+POST {{host}}/api/v1/refunds
+Content-Type: application/json
+
+{
+  "refundId": "R-2004",
+  "orderId": "ORD-3004",
+  "paidAmount": 10000,
+  "refundAmount": 1000
+}
+
+### [25] 25초쯤 뒤 조회 — 기대: FAILED, PG_TIMEOUT, attemptCount 4 (실측 23.8~24.5초, 30초 예산 안)
+### 5초마다 끊고 재시도하므로 오래 걸립니다. 중간에 누르면 ACCEPTED — 정상이니 기다렸다 다시 누르세요.
+GET {{host}}/api/v1/refunds/R-2004
+
+### [26] S12. 응답은 늦었지만 환불은 처리됨 (이 과제에서 가장 중요한 케이스): 상황 지정
+POST {{pg}}/sandbox/scenario
+Content-Type: application/json
+
+{ "refundId": "R-2005", "case": "TIMEOUT_BUT_PROCESSED" }
+
+### [27] 접수 — 기대: 202
+POST {{host}}/api/v1/refunds
+Content-Type: application/json
+
+{
+  "refundId": "R-2005",
+  "orderId": "ORD-3005",
+  "paidAmount": 10000,
+  "refundAmount": 1000
+}
+
+### [28] 8초쯤 뒤 조회 — 기대: COMPLETED, attemptCount 2
+### 5초에 시간 초과로 끊고 "같은 refundId"로 재시도해 성공한 것입니다.
+GET {{host}}/api/v1/refunds/R-2005
+
+### [29] S12 핵심 확인: 결제대행사의 실제 처리 기록 — 기대: PROCESSED 1건 (이중 환불 없음)
+### 우리는 두 번 보냈지만, 같은 ID라서 환불은 한 번만 나갔습니다.
+GET {{pg}}/pg/refunds/R-2005
+
+
+### ==================================================================
+### 5부. 결제대행사 쪽 기록으로 교차 확인
+### ==================================================================
+
+### [30] 결제대행사가 받은 요청 기록 — 재시도 횟수와 순서가 그대로 보입니다
+GET {{pg}}/sandbox/requests
+
+### [31] 결제대행사가 실제로 처리한 환불 — 주문별 처리 건수(countByOrder) 확인
+GET {{pg}}/sandbox/processed
