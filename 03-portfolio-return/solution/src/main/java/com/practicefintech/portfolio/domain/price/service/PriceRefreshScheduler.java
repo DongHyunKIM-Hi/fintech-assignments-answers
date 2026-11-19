@@ -50,6 +50,8 @@ public class PriceRefreshScheduler {
             }
             store.update(byCode, prices.getAsOf(), fx.getRate(), fx.getAsOf());
         } catch (Exception e) {
+            // 실패는 여기서 끝낸다(예외를 위로 올리지 않는다). 여기서 올라가면 조회까지 함께 죽어서
+            // 외부 호출을 요청 경로 밖으로 뺀 의미가 없어진다. 직전 스냅샷을 유지하고 오래된 값 표시만 켠다.
             log.warn("시세 갱신 실패, 마지막 스냅샷을 유지합니다: {}", e.toString());
             store.markStale();
         }

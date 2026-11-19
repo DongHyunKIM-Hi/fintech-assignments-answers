@@ -47,16 +47,25 @@ public class PaymentService {
     private final ConcurrentHashMap<String, Object> userLocks = new ConcurrentHashMap<>();
 
     public PaymentApprovedResponse approve(PaymentRequest request) {
+        // [검사 1] 입력 검증(400)은 컨트롤러의 @Valid가 이미 끝냈다. 여기 오는 요청은 형식이 올바르다.
+
+        // [바깥 락] 결제 ID 단위. computeIfAbsent라서 같은 ID의 첫 요청 둘이 동시에 와도
+        // 락 객체는 하나만 만들어진다. (get 해 보고 없으면 put하는 직접 구현은 그 사이가 또 경쟁 구간이다)
         Object paymentLock = paymentLocks.computeIfAbsent(request.getPaymentId(), id -> new Object());
         synchronized (paymentLock) {
+            // [검사 2] 결제 ID 중복(409). 이 확인과 아래 savePayment가 같은 락 안에 있어서
+            // 같은 ID 동시 10건 중 1건만 통과한다. 사용자가 달라도 같은 ID면 막힌다. (S3, S4)
             if (limitStore.findPayment(request.getPaymentId()).isPresent()) {
                 // 이미 있는 기록이면 승인이었든 취소였든(재사용 불가, D3) 중복입니다.
                 throw new ApiException(HttpStatus.CONFLICT, ErrorCode.DUPLICATE_PAYMENT,
                         "이미 존재하는 결제 ID입니다.", request.getPaymentId());
             }
 
+            // [안쪽 락] 사용자 단위. 락 순서는 언제나 결제 ID → 사용자(취소도 같은 순서)라 교착이 없다.
             Object userLock = userLocks.computeIfAbsent(request.getUserId(), id -> new Object());
             synchronized (userLock) {
+                // [검사 3] 한도(422). 사용액 읽기 → 판단 → 쓰기가 같은 락 안이라,
+                // 동시 요청이 같은 사용액을 각자 읽고 덮어쓰는 일이 없다. (S5: 400,000원 3건 → 2건만 승인)
                 long used = limitStore.getUsedAmount(request.getUserId());
                 long newUsed = used + request.getAmount();
                 if (newUsed > DAILY_LIMIT) {
@@ -65,6 +74,7 @@ public class PaymentService {
                             "한도를 초과했습니다.", request.getPaymentId());
                 }
 
+                // [승인] 수수료는 상태가 없는 순수 계산이라 어디서 불러도 같은 값이다.
                 long fee = feePolicy.calculate(request.getGrade(), request.getPayType(), request.getAmount());
                 limitStore.setUsedAmount(request.getUserId(), newUsed);
                 limitStore.savePayment(new PaymentRecord(
@@ -78,8 +88,11 @@ public class PaymentService {
     }
 
     public CancelResponse cancel(String paymentId) {
+        // 승인과 같은 결제 ID 락을 잡는다. 같은 결제의 취소 10건이 동시에 와도 1건만 통과한다. (S9)
         Object paymentLock = paymentLocks.computeIfAbsent(paymentId, id -> new Object());
         synchronized (paymentLock) {
+            // 없는 결제는 404, 이미 취소된 결제는 409. 취소돼도 기록은 CANCELED로 남아 있어서
+            // 같은 ID로 다시 승인하려 하면 approve의 중복 확인(409)에 걸린다. (S10)
             PaymentRecord record = limitStore.findPayment(paymentId)
                     .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, ErrorCode.PAYMENT_NOT_FOUND,
                             "결제를 찾을 수 없습니다.", paymentId));
@@ -89,6 +102,8 @@ public class PaymentService {
                         "이미 취소된 결제입니다.", paymentId);
             }
 
+            // 사용액 복원도 승인과 같은 사용자 락 안에서 한다. 취소와 승인이 동시에 와도
+            // 사용액이 겹쳐 쓰이지 않는다. (S11: 최종 사용액 = 취소되지 않은 승인 금액의 합)
             Object userLock = userLocks.computeIfAbsent(record.getUserId(), id -> new Object());
             synchronized (userLock) {
                 long used = limitStore.getUsedAmount(record.getUserId());

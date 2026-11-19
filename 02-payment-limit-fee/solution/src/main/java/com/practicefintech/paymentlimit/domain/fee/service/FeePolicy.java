@@ -32,16 +32,25 @@ public class FeePolicy {
     );
 
     public long calculate(Grade grade, PayType payType, long amount) {
+        // [순서 1] 면제 확인 (R1 소액, R2 VIP 국내) — 면제면 여기서 0원으로 끝나므로
+        //          아래의 고액 감면·최소 수수료가 면제를 건드릴 일이 없다.
         if (isExempt(grade, payType, amount)) {
             return 0;
         }
+        // [순서 2] 수수료율 결정 — 등급×유형 표에서 bp를 꺼낸다. R3~R7 다섯 규칙이 이 한 줄이다.
         long bp = BASE_RATE_BP.get(grade).get(payType);
+        // [순서 3] 고액 감면 (R8) — 1,000,000원 "이상"이면 수수료율에서 0.20%p(=20bp)를 뺀다.
+        //          %p는 비율이 아니라 값 자체를 빼는 것이라 bp 정수 뺄셈 한 번이면 된다.
+        //          경계를 초과(>)로 쓰면 딱 1,000,000원에서 감면이 빠져 계산 예시(8,000원)와 어긋난다.
         if (amount >= HIGH_VALUE_THRESHOLD) {
             bp -= HIGH_VALUE_DISCOUNT_BP;
         }
-        long raw = (amount * bp) / BP_DENOMINATOR; // 정수 나눗셈 = 절사(R9)
-        long withMinimum = Math.max(raw, MINIMUM_FEE); // R9
-        return Math.min(withMinimum, MAXIMUM_FEE); // R10
+        // [순서 4] 금액×bp÷10000 — 정수 나눗셈이라 원 단위 미만 절사(R9)가 저절로 된다.
+        //          double로 계산하면 1,000,000원 × 2.80%가 28,000이 아니라 27,999가 되는 오차가 생긴다.
+        long raw = (amount * bp) / BP_DENOMINATOR;
+        long withMinimum = Math.max(raw, MINIMUM_FEE); // 면제가 아니면 최소 100원 (R9)
+        // [순서 5] 최대 수수료 50,000원 (R10)
+        return Math.min(withMinimum, MAXIMUM_FEE);
     }
 
     private boolean isExempt(Grade grade, PayType payType, long amount) {

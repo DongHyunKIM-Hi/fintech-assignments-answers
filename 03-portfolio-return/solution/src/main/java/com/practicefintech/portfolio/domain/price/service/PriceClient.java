@@ -59,6 +59,7 @@ public class PriceClient {
             return call.apply(token);
         } catch (RestClientResponseException e) {
             if (e.getStatusCode().value() == 401) {
+                // 재시도는 딱 한 번이다. 조건 없이 반복하면 재발급-실패가 무한히 돈다.
                 log.info("시세 서버 토큰이 만료된 것으로 보여 재발급 후 재시도합니다.");
                 tokenCache.invalidate();
                 String freshToken = ensureToken();
